@@ -67,9 +67,10 @@ class MetricsCreate(generics.ListCreateAPIView):
     def pre_save(self, obj):
         obj.creator_path = self.request.user.resource_path
 
-class MetricsDetail(generics.RetrieveAPIView):
+class MetricsDetail(generics.RetrieveDestroyAPIView):
     model = Metric
     serializer_class = MetricSerializer
+    permission_classes = IsAuthenticatedOrReadOnly,
 
 class MetriscOperationalize(APIView):
 
