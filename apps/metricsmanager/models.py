@@ -10,7 +10,7 @@ class Metric(models.Model):
         RegexValidator("^(/[^/]*)+/?$")])
 
     # metadata stored for humans
-    title = models.CharField(max_length=100, unique=True)
+    title=models.CharField(max_length=100, unique = True)
     acronym = models.CharField(max_length=20, unique=True)
     description = models.TextField(default="", blank=True)
     keywords = models.CharField(default="", blank=True, max_length=400,
