@@ -10,7 +10,6 @@ from rest_framework.views import APIView
 from .file_encoder import FileEncoder
 from .serializers import *
 from collections import OrderedDict
-from pandasdmx import Request
 import json
 
 __author__ = 'fki'
@@ -106,7 +105,6 @@ class Converter(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 class EurostatSearchProxy(APIView):
-    # FIXME Potential DDoS Source. Remove once EDP Auth is gone.
     def get(self, request, *args, **kwargs):
         apiBase = request.GET.get('api')
         term = request.GET.get('q')
@@ -118,17 +116,20 @@ class EurostatSearchProxy(APIView):
             return Response({'error': 'Invalid parameters.'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        print("str ", str(term))
         request = "http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/" + str(term) + "?precision=1"
 
         data = requests.get(request)
+
+        if data.status_code == 400:
+            return Response({'error': 'Could not find Database'}, status=status.HTTP_400_BAD_REQUEST)
+        elif data.status_code == 416:
+            return Response({'error': 'Too many categories have been requested. Maximum is 50'}, status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE)
 
         array = data.json(object_pairs_hook=OrderedDict)
 
         dimensions = array['dimension']
         dimensionsList = list(dimensions)
         dimensionsValues = dimensions.values()
-
 
         filtersList = dimensionsList
 
@@ -157,6 +158,8 @@ class EurostatSearchProxy(APIView):
 
         if data.status_code == 200:
             return Response(filterJson, status=status.HTTP_200_OK)
+        elif data.status_code == 400:
+            return Response({'error': 'Could not find Database'}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'error': 'Server error. Check the logs.'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -174,8 +177,6 @@ class EurostatDownloadProxy(APIView):
         else:
             filters = json.loads(filtersString)
 
-        #filters = filtersJSON.json(object_pairs_hook=OrderedDict)
-
         filters = filters.get('result')
         if(filters):
             for key in range(0, len(filters)):
@@ -183,6 +184,11 @@ class EurostatDownloadProxy(APIView):
                     query += '&'+ filters[key][0] + '=' + filters[key][1][value]
 
         data = requests.get("http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/" + str(dataset) + "?precision=1" + query.strip())
+
+        if data.status_code == 400:
+            return Response({'error': 'Could not find Database'}, status=status.HTTP_400_BAD_REQUEST)
+        elif data.status_code == 416:
+            return Response({'error': 'Too many categories have been requested. Maximum is 50'}, status=status.HTTP_416_REQUESTED_RANGE_NOT_SATISFIABLE)
 
         array = data.json(object_pairs_hook=OrderedDict)
 
