@@ -104,6 +104,7 @@ class Converter(APIView):
         return Response({'error': "No Form field 'file'"},
                         status=status.HTTP_400_BAD_REQUEST)
 
+
 class EurostatSearchProxy(APIView):
     def get(self, request, *args, **kwargs):
         apiBase = request.GET.get('api')
@@ -129,7 +130,6 @@ class EurostatSearchProxy(APIView):
 
         dimensions = array['dimension']
         dimensionsList = list(dimensions)
-        dimensionsValues = dimensions.values()
 
         filtersList = dimensionsList
 
@@ -152,9 +152,8 @@ class EurostatSearchProxy(APIView):
             filtersDetailList.update({filtersList[f]: newFilterList})
 
         filters = {"result": filtersDetailList}
-        filtersString = str(filters).replace("'",'"')
+        filtersString = str(filters).replace("'", '"')
         filterJson = json.loads(filtersString)
-
 
         if data.status_code == 200:
             return Response(filterJson, status=status.HTTP_200_OK)
@@ -163,6 +162,7 @@ class EurostatSearchProxy(APIView):
         else:
             return Response({'error': 'Server error. Check the logs.'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class EurostatDownloadProxy(APIView):
     def get(self, request, *args, **kwargs):
@@ -181,7 +181,7 @@ class EurostatDownloadProxy(APIView):
         if(filters):
             for key in range(0, len(filters)):
                 for value in range(0, len(filters[key][1])):
-                    query += '&'+ filters[key][0] + '=' + filters[key][1][value]
+                    query += '&' + filters[key][0] + '=' + filters[key][1][value]
 
         data = requests.get("http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/" + str(dataset) + "?precision=1" + query.strip())
 
@@ -202,13 +202,13 @@ class EurostatDownloadProxy(APIView):
 
         colHeadersVals = list(colHeaders.values())
 
-        colLen = len(colHeadersVals)+1
+        colLen = len(colHeadersVals) + 1
 
         colHeadersValues = []
 
         colHeadersValues.append("")
 
-        for q in range(0, colLen-1):
+        for q in range(0, colLen - 1):
             colHeadersValues.append(colHeadersVals[q])
 
         val = array['value']
@@ -220,10 +220,10 @@ class EurostatDownloadProxy(APIView):
         index = 0
         for row in range(0, rowLen):
             colArray = []
-            position = row*(colLen-1)
+            position = row * (colLen - 1)
             colArray.append(rowHeadersValues[row])
-            for col in range(0, colLen-1):
-                if val.get(str(position+col)) is None:
+            for col in range(0, colLen - 1):
+                if val.get(str(position + col)) is None:
                     colArray.append("")
                 else:
                     colArray.append(values[index])
@@ -231,7 +231,7 @@ class EurostatDownloadProxy(APIView):
 
             rowArrays.append(colArray)
 
-        resultArray =  []
+        resultArray = []
         resultArray.append(colHeadersValues)
 
         for y in range(0, len(rowArrays)):
@@ -305,11 +305,9 @@ class CKANDownloadProxy(APIView):
                                 content_type='application/octet-stream',
                                 status=status.HTTP_200_OK)
 
-
         file = SimpleUploadedFile(
             name='file.%s' % (json['result']['format'].lower()),
             content=data.content,
             content_type='application/octet+stream')
-
 
         return Converter.process_file(file)
