@@ -12,6 +12,9 @@ class BaseDatasetSerializer(ModelSerializer):
     resource = ResourceField(required=False)
     policy_domains = SlugRelatedField(many=True, slug_field='domain',
                                       source='domains')
+    spatials = SlugRelatedField(many=True, slug_field='spatial',
+                                      source='spatials')
+
     creator_path = Field(source='creator_path')
 
     def to_native(self, obj):
@@ -53,6 +56,7 @@ class BaseDatasetSerializer(ModelSerializer):
 class DetailDatasetSerializer(BaseDatasetSerializer):
     data = DataField(source='data')
     policy_domains = SlugRelatedField(many=True, slug_field='domain', source='domains')
+    spatials = SlugRelatedField(many=True, slug_field='spatial', source='spatials')
 
     class Meta:
         exclude = (
@@ -70,3 +74,4 @@ class DetailDatasetSerializer(BaseDatasetSerializer):
 
 class UpdateDatasetSerializer(DetailDatasetSerializer):
     policy_domains = WritableField(source='policy_domains')
+    spatials = WritableField(source='spatials')

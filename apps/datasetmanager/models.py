@@ -30,7 +30,6 @@ class Dataset(models.Model):
     is_applied = models.BooleanField(blank=True, default=False)
     metric_id = models.IntegerField(blank=True, null=True)  # MM metric
 
-    spatial = models.IntegerField(blank=True, null=True)  # RP individuals
     license = models.CharField(max_length=100, blank=True)
 
     version = models.IntegerField(editable=False)
@@ -58,6 +57,17 @@ class Dataset(models.Model):
 
     # Private property to handle the policy domains
     _policy_domains = None
+
+    _spatials = None
+
+    # Get all Spatial IDs
+    @property
+    def spatials(self):
+        return self.spatials.all()
+
+    @spatials.setter
+    def spatials(self,value):
+        self._spatials = value
 
     # Get all Policy Domain IDs
     @property
@@ -91,11 +101,21 @@ class Dataset(models.Model):
                 # Create new relations
                 for d in self._policy_domains:
                     self.domains.create(domain=d)
+            if self._spatials:
+                # Delete olf policy domain relations
+                self.spatials.all().delete()
+                # Create new relations
+                for s in self._spatials:
+                    self.spatials.create(spatial=s)
         else:
             if self._policy_domains:
                 # Create Policy Domain relations
                 for d in self._policy_domains:
                     self.domains.create(domain=d)
+            if self._spatials:
+                # Create Policy Domain relations
+                for s in self._spatials:
+                    self.spatials.create(spatial=s)
 
     class Meta:
         # Standard sorting by date
@@ -119,3 +139,18 @@ class DatasetInDomain(models.Model):
 
     def __str__(self):
         return str(self.domain)
+
+class DatasetInSpatial(models.Model):
+    """
+    Represents the 1:m relation between a Dataset and Spatials
+    """
+    spatial = models.IntegerField()
+    # Set the relation
+    dataset = models.ForeignKey(Dataset, related_name='spatials')
+
+    class Meta:
+        verbose_name = "Dataset in Spatial"
+        verbose_name_plural = "Dataset in Spatials"
+
+    def __str__(self):
+        return str(self.spatial)
