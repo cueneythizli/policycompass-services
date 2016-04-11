@@ -58,12 +58,13 @@ class Dataset(models.Model):
     # Private property to handle the policy domains
     _policy_domains = None
 
+    # Private property to handle the spatials
     _spatials = None
 
     # Get all Spatial IDs
     @property
     def spatials(self):
-        return self.spatials.all()
+        return self.dataset_spatials.all()
 
     @spatials.setter
     def spatials(self,value):
@@ -103,19 +104,19 @@ class Dataset(models.Model):
                     self.domains.create(domain=d)
             if self._spatials:
                 # Delete olf policy domain relations
-                self.spatials.all().delete()
+                self.dataset_spatials.all().delete()
                 # Create new relations
                 for s in self._spatials:
-                    self.spatials.create(spatial=s)
+                    self.dataset_spatials.create(spatial=s)
         else:
             if self._policy_domains:
                 # Create Policy Domain relations
                 for d in self._policy_domains:
                     self.domains.create(domain=d)
             if self._spatials:
-                # Create Policy Domain relations
+                # Create Spatial relations
                 for s in self._spatials:
-                    self.spatials.create(spatial=s)
+                    self.dataset_spatials.create(spatial=s)
 
     class Meta:
         # Standard sorting by date
@@ -146,7 +147,7 @@ class DatasetInSpatial(models.Model):
     """
     spatial = models.IntegerField()
     # Set the relation
-    dataset = models.ForeignKey(Dataset, related_name='spatials')
+    dataset = models.ForeignKey(Dataset, related_name='dataset_spatials')
 
     class Meta:
         verbose_name = "Dataset in Spatial"

@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('spatial', models.IntegerField()),
-                ('dataset', models.ForeignKey(related_name='spatials', to='datasetmanager.Dataset')),
+                ('dataset', models.ForeignKey(related_name='dataset_spatials', to='datasetmanager.Dataset')),
             ],
             options={
                 'verbose_name': 'Dataset in Spatial',

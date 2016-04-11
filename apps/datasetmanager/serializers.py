@@ -13,7 +13,7 @@ class BaseDatasetSerializer(ModelSerializer):
     policy_domains = SlugRelatedField(many=True, slug_field='domain',
                                       source='domains')
     spatials = SlugRelatedField(many=True, slug_field='spatial',
-                                      source='spatials')
+                                      source='dataset_spatials')
 
     creator_path = Field(source='creator_path')
 
@@ -56,7 +56,7 @@ class BaseDatasetSerializer(ModelSerializer):
 class DetailDatasetSerializer(BaseDatasetSerializer):
     data = DataField(source='data')
     policy_domains = SlugRelatedField(many=True, slug_field='domain', source='domains')
-    spatials = SlugRelatedField(many=True, slug_field='spatial', source='spatials')
+    spatials = SlugRelatedField(many=True, slug_field='spatial', source='dataset_spatials')
 
     class Meta:
         exclude = (
