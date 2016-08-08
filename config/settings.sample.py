@@ -37,6 +37,7 @@ PC_SERVICES = {
         'languages': '/api/v1/references/languages',
         'domains': '/api/v1/references/policydomains',
         'dateformats': '/api/v1/references/dateformats',
+        'licenses': '/api/v1/references/licenses',
         'eventsInVisualizations': '/api/v1/visualizationsmanager/eventsInVisualizations',
         #'metricsInvisualizations': '/api/v1/visualizationsmanager/metricsInVisualizations',
         'datasetsInvisualizations': '/api/v1/visualizationsmanager/datasetsInVisualizations',
