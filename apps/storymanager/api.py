@@ -63,7 +63,7 @@ class StoryView(generics.ListCreateAPIView):
             for con in range(0, len(chapterContents)):
                 contentId = int(str(chapterContents[con]))
                 content = Content.objects.get(pk=contentId)
-                contents.append({"type":content.type, "index":content.index, "stringIndex":content.stringIndex, "contentId":content.id})
+                contents.append({"type":content.type, "index":content.index, "contentId":content.id})
             chapters.append({"title":chapter.title, "text":chapter.text, "number":chapter.number, "contents":contents})
 
         storyResult = {"title":story.title, "chapters":chapters, "id":story.id}
@@ -89,7 +89,7 @@ class StoryView(generics.ListCreateAPIView):
             contents = chapters[i]['contents']
             contentIndices = []
             for j in range(0, len(contents)):
-                newContent = Content(type=contents[j]['type'], index=contents[j]['index'], stringIndex=contents[j]['stringIndex'])
+                newContent = Content(type=contents[j]['type'], index=contents[j]['index'])
                 newContent.save()
                 contentIndices.append(newContent.id)
             newChapter = Chapter(title=chapters[i]['title'], text=chapters[i]['text'], number=chapters[i]['number'], contents=contentIndices)
@@ -145,7 +145,7 @@ class StoryDetail(generics.RetrieveUpdateDestroyAPIView):
             contents = chapters[i]['contents']
             contentIndices = []
             for j in range(0, len(contents)):
-                newContent = Content(type=contents[j]['type'], index=contents[j]['index'], stringIndex=contents[j]['stringIndex'])
+                newContent = Content(type=contents[j]['type'], index=contents[j]['index'])
                 newContent.save()
                 contentIndices.append(newContent.id)
             newChapter = Chapter(title=chapters[i]['title'], text=chapters[i]['text'], number=chapters[i]['number'], contents=contentIndices)

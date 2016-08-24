@@ -65,7 +65,6 @@ class ContentSerializer(serializers.ModelSerializer):
 class UpdateContentSerializer(ContentSerializer):
     type = serializers.IntegerField()
     index = serializers.IntegerField()
-    stringIndex = serializers.IntegerField()
     class Meta:
         model = Content
 
@@ -73,7 +72,6 @@ class UpdateContentSerializer(ContentSerializer):
 class ExternalContentSerializer(serializers.Serializer):
     type = serializers.IntegerField()
     index = serializers.IntegerField()
-    stringIndex = serializers.IntegerField()
 
     class Meta:
         model = Content

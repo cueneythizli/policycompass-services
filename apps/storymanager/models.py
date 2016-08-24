@@ -2,9 +2,9 @@ from django.db import models
 
 
 class Content(models.Model):
-    type = models.IntegerField() # 0=causal, 1=metrics, 2=visualisations
+    #type = models.IntegerField() # 0=causal, 1=metrics, 2=visualisations
+    type = models.CharField(max_length=100)
     index = models.IntegerField()
-    stringIndex = models.IntegerField()
 
     issued = models.DateTimeField(auto_now_add=True)  # dateAddedtoPC
     modified = models.DateTimeField(auto_now=True)  # dateModified
