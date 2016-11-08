@@ -3,6 +3,7 @@ from apps.datasetmanager.models import Dataset
 from django.db import models
 from django.apps import apps as django_apps
 from collections import OrderedDict
+from django.conf import settings
 import json
 import requests
 import datetime
@@ -102,53 +103,49 @@ class Command(BaseCommand):
 
             resultArray = []
 
-            dataset_test = Dataset.objects.get(pk=19)
-
-            print("dataset ", type(dataset_test.data))
-
-            data_frame = {}
             for row in range(0, len(rowArrays)):
-                valuesDict = {}
-                for i in range(1, len(colHeadersValues)):
-                    valuesDict[colHeadersValues[i]+"-01-01T00:00:00.000Z"] = rowArrays[row][i]
-
-                #valuesDict = OrderedDict(sorted(valuesDict.items(), key=lambda t: t[0]))
-
-                spatial = -1
-
+                values = {}
+                spatial = ""
                 for individual in individuals_list:
                     if rowArrays[row][0] == individual.title:
-                        spatial = individual.id
+                        spatial = individual.title
 
-                data_frame[str(spatial)] = valuesDict
-
-
-
-            data_dict = {"resolution":"year", "unit":25, "data_frame": str(data_frame)}
-
-            #pandas_data = pandas.DataFrame(data_dict)
-
-            dictString = str(data_dict).replace("{'", '{"')
-            dictString = str(dictString).replace("':", '":')
-            dictString = str(dictString).replace("['", '["')
-            dictString = str(dictString).replace("]'", ']"')
-            dictString = str(dictString).replace("']", '"]')
-            dictString = str(dictString).replace("',", '",')
-            dictString = str(dictString).replace(", '", ', "')
-            dictString = str(dictString).replace("'", '"')
-
-            print("data_dict ", dictString)
+                for i in range(1, len(colHeadersValues)):
+                    if type(rowArrays[row][i]) is str:
+                        values[colHeadersValues[i]] = None
+                    else:
+                        values[colHeadersValues[i]] = rowArrays[row][i]
 
 
-            new_dataset = Dataset(title=array['label'], description=array['label'], keywords=array['label'], time_resolution="year",
-                                  time_start=colHeadersValues[1], time_end=colHeadersValues[len(colHeadersValues)-1],
-                                  spatials=spatials, language_id=38, resource_issued=datetime.datetime.today().strftime('%Y-%m-%d'),
-                                  resource_url="http://appsso.eurostat.ec.europa.eu/nui/show.do?dataset="+ str(code) +"&lang=en",
-                                  resource_id=71, unit_id=25, indicator_id=new_indicator.id, class_id=1, policy_domains=[1],
-                                  license_id=96,
-                                  data=dictString)
-
-            new_dataset.save()
+                resultArray.append({"row":row+1, "individual":spatial, "values":values})
 
 
+            headers = {'content-type': 'application/json', 'x-user-path':'https://adhocracy-prod.policycompass.eu/api/principals/users/0000072/',
+                       'x-user-token':'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE0Nzg1Mjg2NDIsInN1YiI6Ii9wcmluY2lwYWxzL3VzZXJzLzAwMDAwNzIiLCJleHAiOjE0ODExMjA2NDJ9.HhV3dnlZp_B_A0q6Ijq7MMwC8tbcDMz72ZqP2XW9WCumLZVVoMoGSaxk7CyZkC-F4jSHrx4htn9h5ZqOx35l3Q'}
+
+            payload = {"time":
+                    {"resolution":"year","start":colHeadersValues[1],"end":colHeadersValues[len(colHeadersValues)-1]},
+                    "resource":{"issued":datetime.datetime.today().strftime('%Y-%m-%d'),
+                        "external_resource":71,
+                        "url":"http://appsso.eurostat.ec.europa.eu/nui/show.do?dataset="+ str(code) +"&lang=en"
+                    },
+                    "policy_domains":[1],
+                    "title":array['label'],
+                    "keywords":array['label'],
+                    "license_id":96,
+                    "description":array['label'],
+                    "spatials":spatials,
+                    "language_id":38,
+                    "indicator_id":new_indicator.id,
+                    "class_id":1,
+                    "user_id":1,
+                    "unit_id":25,
+                    "data":{"table":resultArray},
+                    "is_draft":True}
+
+
+
+            print("payload " , json.dumps({"table":resultArray}))
+
+            result = requests.post(settings.PC_SERVICES['references']['base_url'] + '/api/v1/datasetmanager/datasets', data=json.dumps(payload), headers=headers)
 
