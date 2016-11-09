@@ -20,12 +20,12 @@ class Command(BaseCommand):
             dataflows = dataflow.msg.dataflows
             args = dataflows.keys()
 
-        filters = []
-        query = " "
-        filters_description = ""
-
         # iterate over every Eurostat code in arguments
         for code in args:
+            filters = []
+            query = " "
+            filters_description = ""
+
             data = requests.get("http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/" + str(code) + "?precision=1")
 
             # selection of filters
@@ -54,9 +54,8 @@ class Command(BaseCommand):
                 # new request with selected filters
                 data = requests.get("http://ec.europa.eu/eurostat/wdds/rest/data/v2.1/json/en/" + str(code) + "?precision=1" + query.strip())
 
-            array = data.json(object_pairs_hook=OrderedDict)
-
             try:
+                array = data.json(object_pairs_hook=OrderedDict)
                 # get countries
                 rowHeaders = array['dimension']['geo']['category']['label']
                 rowHeadersValues = list(rowHeaders.values())
